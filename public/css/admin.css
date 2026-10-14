@@ -1,0 +1,179 @@
+
+/* ===== Appointment System - Admin Styles ===== */
+
+.admin-page {
+    padding-top: 1px;
+    padding-bottom: 42px;
+}
+
+.admin-page .welcome {
+    margin-top: 28px;
+    margin-bottom: 22px;
+}
+
+.admin-page .welcome h2 {
+    font-size: 27px;
+}
+
+.admin-page .welcome p {
+    margin-bottom: 16px;
+}
+
+.admin-page .booking {
+    padding: 26px;
+}
+
+.admin-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-toolbar h2 {
+    margin: 0;
+    font-size: 21px;
+}
+
+#refresh-button {
+    flex-shrink: 0;
+}
+
+#status-filter {
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    min-height: 42px;
+    margin: 7px 0 18px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+}
+
+#admin-message {
+    min-height: 24px;
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+}
+
+.appointments-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    font-size: 13px;
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 14px 13px;
+    border-bottom: 1px solid #e9eeec;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.appointments-table th {
+    background: #f1f5f3;
+    color: #42575b;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15px;
+}
+
+.appointments-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.appointments-table tbody tr:hover {
+    background: #f8faf9;
+}
+
+.appointments-table td:first-child {
+    color: var(--navy);
+    font-weight: 700;
+}
+
+/* Status text */
+
+.appointments-table .status-pending {
+    color: #8a620d;
+    font-weight: 600;
+}
+
+.appointments-table .status-confirmed {
+    color: #23734f;
+    font-weight: 600;
+}
+
+.appointments-table .status-cancelled {
+    color: #b04444;
+    font-weight: 600;
+}
+
+.appointments-table .status-completed {
+    color: #315e9b;
+    font-weight: 600;
+}
+
+/* Action buttons */
+
+.appointments-table button {
+    min-height: 33px;
+    margin: 2px 4px 2px 0;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.appointments-table button:not(.button) {
+    background: white;
+    color: var(--text);
+}
+
+.appointments-table button:nth-child(2) {
+    background: white;
+    border-color: #d7b5b5;
+    color: #a43f3f;
+}
+
+.appointments-table button:nth-child(2):hover {
+    background: #fbefef;
+    border-color: #c98282;
+}
+
+@media (max-width: 650px) {
+    .admin-page .welcome {
+        margin-top: 20px;
+        padding: 22px 18px;
+    }
+
+    .admin-page .booking {
+        padding: 19px 14px;
+    }
+
+    .admin-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 18px;
+    }
+
+    #refresh-button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lịch hẹn - Appointment</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Appointment</h1>
+            <p>Trang quản lý lịch hẹn</p>
+        </div>
+    </header>
+
+    <main class="container admin-page">
+        <section class="welcome">
+            <h2>Quản lý lịch hẹn</h2>
+            <p>Theo dõi thông tin khách hàng và trạng thái đặt lịch.</p>
+            <a class="button" href="/">Quay lại trang đặt lịch</a>
+        </section>
+
+        <section class="booking">
+            <div class="admin-toolbar">
+                <h2>Danh sách lịch hẹn</h2>
+                <button class="button" id="refresh-button" type="button">
+                    Tải lại
+                </button>
+            </div>
+
+            <label for="status-filter">Lọc theo trạng thái</label>
+            <select id="status-filter">
+                <option value="all">Tất cả</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="cancelled">Đã hủy</option>
+                <option value="completed">Đã hoàn thành</option>
+            </select>
+
+            <p id="admin-message" role="status"></p>
+
+            <div class="table-wrapper">
+                <table class="appointments-table">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Khách hàng</th>
+                            <th>Liên hệ</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày hẹn</th>
+                            <th>Giờ</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointments-body">
+                        <tr>
+                            <td colspan="8">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Appointment System - Bài thi triển khai và quản trị hệ thống</p>
+    </footer>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

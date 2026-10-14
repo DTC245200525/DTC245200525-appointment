@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment System - Đặt lịch hẹn</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Appointment</h1>
+            <p>Hệ thống đặt lịch hẹn trực tuyến</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="welcome">
+            <h2>Đặt lịch hẹn dễ dàng</h2>
+            <p>Chọn dịch vụ, thời gian phù hợp và gửi yêu cầu đặt lịch.</p>
+            <a class="button" href="#booking">Đặt lịch ngay</a>
+        </section>
+
+        <section id="booking" class="booking">
+            <h2>Thông tin đặt lịch</h2>
+
+            <form id="booking-form">
+                <label for="fullName">Họ và tên</label>
+                <input id="fullName" name="fullName"
+                       type="text" required>
+
+                <label for="phone">Số điện thoại</label>
+                <input id="phone" name="phone"
+                       type="tel" required>
+
+                <label for="email">Email</label>
+                <input id="email" name="email"
+                       type="email" required>
+
+                <label for="service">Dịch vụ</label>
+                <select id="service" name="service" required>
+                    <option value="">-- Chọn dịch vụ --</option>
+                    <option value="consultation">Tư vấn</option>
+                    <option value="maintenance">Bảo trì</option>
+                    <option value="other">Dịch vụ khác</option>
+                </select>
+
+                <label for="date">Ngày hẹn</label>
+                <input id="date" name="date"
+                       type="date" required>
+
+                <label for="time">Giờ hẹn</label>
+                <input id="time" name="time"
+                       type="time" required>
+
+                <button class="button" type="submit">
+                    Gửi yêu cầu đặt lịch
+                </button>
+
+                <p id="message" role="status"></p>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Appointment System - Bài thi triển khai và quản trị hệ thống</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
