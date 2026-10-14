@@ -98,10 +98,13 @@ Docker Compose sử dụng ba network:
 
 ### `frontend`
 
-Dùng cho kết nối giữa:
+Dùng cho:
 
 - Nginx
 - Appointment App
+- pgAdmin
+
+pgAdmin tham gia cả `backend` và `frontend`: `backend` dùng để kết nối PostgreSQL, còn `frontend` cho phép Docker Desktop publish giao diện pgAdmin ra `127.0.0.1:5050`. Cổng pgAdmin chỉ bind vào localhost.
 
 ### `backend`
 
