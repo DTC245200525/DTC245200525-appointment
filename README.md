@@ -159,17 +159,35 @@ Dùng cho:
 
 Dự án sử dụng file `.env` để lưu các giá trị cấu hình và thông tin nhạy cảm.
 
-Ví dụ:
+Tạo file `.env` từ file mẫu `.env.example`:
+
+```powershell
+# Trên Windows PowerShell:
+Copy-Item .env.example .env
+
+# Hoặc trên Linux / macOS / Bash:
+cp .env.example .env
+```
+
+Nội dung mẫu trong `.env.example`:
 
 ```env
+PORT=3000
+
 POSTGRES_DB=appointment_db
-POSTGRES_USER=your_database_user
-POSTGRES_PASSWORD=your_strong_password
+POSTGRES_USER=appointment_user
+POSTGRES_PASSWORD=your_postgres_password_here
+
+DB_HOST=postgres
+DB_PORT=5432
+
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=your_pgadmin_password_here
 ```
 
 Không sử dụng mật khẩu ví dụ trên cho môi trường thực tế.
 
-File `.env` đã được thêm vào `.gitignore` và **không được commit lên GitHub**.
+File `.env` đã được thêm vào `.gitignore` và **không được commit lên GitHub**. File `.env.example` được commit lên GitHub để làm tài liệu và mẫu thiết lập cho môi trường mới.
 
 Các file backup cục bộ dạng:
 
