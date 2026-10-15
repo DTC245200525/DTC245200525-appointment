@@ -5,12 +5,60 @@ const express = require("express");
 const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const pool = require("./db");
 const promClient = require("prom-client");
 
 const app = express();
 app.disable("x-powered-by");
 const PORT = process.env.PORT || 3000;
+
+// ==================== ADMIN AUTH CONFIG ====================
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin_2026_StrongPass";
+const AUTH_SECRET = process.env.AUTH_SECRET || "appointment_jwt_secret_2026_secure";
+
+function generateToken(username) {
+    const payload = `${username}:${Date.now()}`;
+    const hmac = crypto.createHmac("sha256", AUTH_SECRET).update(payload).digest("hex");
+    return `${Buffer.from(payload).toString("base64")}.${hmac}`;
+}
+
+function verifyToken(token) {
+    if (!token || typeof token !== "string" || !token.includes(".")) return null;
+    const [encodedPayload, signature] = token.split(".");
+    try {
+        const payload = Buffer.from(encodedPayload, "base64").toString("utf-8");
+        const expectedHmac = crypto.createHmac("sha256", AUTH_SECRET).update(payload).digest("hex");
+        if (signature !== expectedHmac) return null;
+        const [username, timestamp] = payload.split(":");
+        // Token có hiệu lực trong 24 giờ
+        if (Date.now() - Number(timestamp) > 24 * 60 * 60 * 1000) return null;
+        return username;
+    } catch {
+        return null;
+    }
+}
+
+function requireAdmin(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+            status: "error",
+            message: "Yêu cầu đăng nhập quản trị viên để truy cập."
+        });
+    }
+    const token = authHeader.split(" ")[1];
+    const username = verifyToken(token);
+    if (!username) {
+        return res.status(401).json({
+            status: "error",
+            message: "Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."
+        });
+    }
+    req.adminUser = username;
+    next();
+}
 
 // ==================== FILE LOGGING ====================
 
@@ -315,9 +363,92 @@ app.post("/api/appointments", async (req, res) => {
     }
 });
 
-// ==================== GET APPOINTMENTS ====================
+// ==================== ADMIN AUTH ENDPOINTS ====================
 
-app.get("/api/appointments", async (req, res) => {
+app.post("/api/admin/login", (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({
+            status: "error",
+            message: "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu."
+        });
+    }
+
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        const token = generateToken(username);
+        return res.json({
+            status: "success",
+            message: "Đăng nhập thành công.",
+            token,
+            user: { username }
+        });
+    }
+
+    return res.status(401).json({
+        status: "error",
+        message: "Tên đăng nhập hoặc mật khẩu không chính xác."
+    });
+});
+
+app.get("/api/admin/verify", requireAdmin, (req, res) => {
+    res.json({
+        status: "success",
+        user: { username: req.adminUser }
+    });
+});
+
+// ==================== PUBLIC APPOINTMENT LOOKUP ====================
+
+app.get("/api/appointments/lookup", async (req, res) => {
+    const rawQuery = String(req.query.q || "").trim();
+
+    if (!rawQuery) {
+        return res.status(400).json({
+            status: "error",
+            message: "Vui lòng nhập số điện thoại hoặc mã lịch hẹn."
+        });
+    }
+
+    const cleanQuery = rawQuery.replace("#", "");
+    const isNumeric = /^\d+$/.test(cleanQuery);
+    const appointmentId = isNumeric ? Number(cleanQuery) : 0;
+
+    try {
+        const result = await pool.query(`
+            SELECT
+                a.id,
+                c.full_name,
+                c.phone,
+                s.name AS service_name,
+                a.appointment_date,
+                a.start_time,
+                a.end_time,
+                a.status,
+                a.created_at
+            FROM appointments a
+            JOIN customers c ON a.customer_id = c.id
+            JOIN services s ON a.service_id = s.id
+            WHERE c.phone = $1 OR (a.id = $2 AND $3 = TRUE)
+            ORDER BY a.appointment_date DESC, a.start_time DESC
+        `, [cleanQuery, appointmentId, isNumeric]);
+
+        res.json({
+            status: "success",
+            data: result.rows
+        });
+    } catch (error) {
+        console.error("Lookup error:", error.message);
+        res.status(500).json({
+            status: "error",
+            message: "Lỗi tra cứu lịch hẹn."
+        });
+    }
+});
+
+// ==================== GET APPOINTMENTS (ADMIN ONLY) ====================
+
+app.get("/api/appointments", requireAdmin, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT
@@ -351,9 +482,9 @@ app.get("/api/appointments", async (req, res) => {
     }
 });
 
-// ==================== UPDATE APPOINTMENT STATUS ====================
+// ==================== UPDATE APPOINTMENT STATUS (ADMIN ONLY) ====================
 
-app.patch("/api/appointments/:id/status", async (req, res) => {
+app.patch("/api/appointments/:id/status", requireAdmin, async (req, res) => {
     const id = Number(req.params.id);
     const { status } = req.body;
 
@@ -382,7 +513,7 @@ app.patch("/api/appointments/:id/status", async (req, res) => {
             `UPDATE appointments
              SET status = $1
              WHERE id = $2
-               AND status = 'pending'
+               AND status IN ('pending', 'confirmed')
              RETURNING id, status`,
             [status, id]
         );
@@ -390,7 +521,7 @@ app.patch("/api/appointments/:id/status", async (req, res) => {
         if (result.rowCount === 0) {
             return res.status(404).json({
                 status: "error",
-                message: "Không tìm thấy lịch hẹn đang chờ xác nhận."
+                message: "Không tìm thấy lịch hẹn hoặc lịch đã hoàn thành/đã hủy."
             });
         }
 

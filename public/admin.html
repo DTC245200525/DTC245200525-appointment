@@ -1,73 +1,267 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý lịch hẹn - Appointment</title>
+    <meta name="description" content="Trung tâm quản trị lịch hẹn - Appointment System">
+    <title>Quản lý lịch hẹn - Appointment Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
-<body>
-    <header class="header">
-        <div class="container">
-            <h1>Appointment</h1>
-            <p>Trang quản lý lịch hẹn</p>
+<body class="admin-page">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/" aria-label="Appointment System - Trang chủ">
+                <span class="brand-mark" aria-hidden="true">A</span>
+                <span class="brand-text">
+                    <strong>Appointment</strong>
+                    <small>Admin Portal</small>
+                </span>
+            </a>
+
+            <!-- Right navigation controls -->
+            <nav class="main-nav" aria-label="Điều hướng">
+                <a href="/">Trang đặt lịch</a>
+                <div id="admin-user-nav" class="admin-user-nav" style="display: none;">
+                    <span class="admin-user-pill">
+                        Tài khoản: <strong id="admin-user-display" style="margin-left: 4px;">admin</strong>
+                    </span>
+                    <button type="button" class="button button-sm btn-logout" id="logout-button">
+                        Đăng xuất
+                    </button>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <main class="container admin-page">
-        <section class="welcome">
-            <h2>Quản lý lịch hẹn</h2>
-            <p>Theo dõi thông tin khách hàng và trạng thái đặt lịch.</p>
-            <a class="button" href="/">Quay lại trang đặt lịch</a>
-        </section>
+    <main>
+        <!-- SCREEN 1: ADMIN LOGIN SCREEN (Hiển thị khi chưa xác thực) -->
+        <div id="admin-login-screen" class="admin-login-wrapper">
+            <div class="admin-login-card">
+                <h2>Xác thực Quản trị viên</h2>
+                <p class="login-desc">Khu vực bảo mật nội bộ. Vui lòng nhập tài khoản để truy cập dữ liệu.</p>
 
-        <section class="booking">
-            <div class="admin-toolbar">
-                <h2>Danh sách lịch hẹn</h2>
-                <button class="button" id="refresh-button" type="button">
-                    Tải lại
-                </button>
+                <form id="login-form" class="login-form" novalidate>
+                    <div class="login-field">
+                        <label for="login-username">Tên đăng nhập</label>
+                        <div class="login-input-group">
+                            <input type="text" id="login-username" name="username" placeholder="Tên đăng nhập" autocomplete="username" required>
+                        </div>
+                    </div>
+
+                    <div class="login-field">
+                        <label for="login-password">Mật khẩu</label>
+                        <div class="login-input-group">
+                            <input type="password" id="login-password" name="password" placeholder="Mật khẩu quản trị" autocomplete="current-password" required>
+                            <button type="button" class="btn-toggle-pwd" id="toggle-pwd-btn" title="Ẩn/Hiện mật khẩu">Hiện</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="button button-primary btn-login-submit" id="login-submit-btn">
+                        <span id="login-btn-text">Đăng nhập</span>
+                    </button>
+
+                    <div id="login-error" role="alert"></div>
+                </form>
+
+                <div class="login-security-notice">
+                    Hệ thống xác thực phiên làm việc an toàn.
+                </div>
             </div>
+        </div>
 
-            <label for="status-filter">Lọc theo trạng thái</label>
-            <select id="status-filter">
-                <option value="all">Tất cả</option>
-                <option value="pending">Chờ xác nhận</option>
-                <option value="confirmed">Đã xác nhận</option>
-                <option value="cancelled">Đã hủy</option>
-                <option value="completed">Đã hoàn thành</option>
-            </select>
+        <!-- SCREEN 2: ADMIN DASHBOARD (Chỉ hiển thị sau khi đăng nhập thành công) -->
+        <div id="admin-dashboard-screen" style="display: none;">
+            <!-- Admin Hero Banner -->
+            <section class="admin-hero">
+                <div class="container admin-hero-inner">
+                    <div class="admin-hero-content">
+                        <span class="eyebrow">Bảng điều khiển</span>
+                        <h1>Quản lý lịch hẹn</h1>
+                        <p>Theo dõi yêu cầu đặt lịch, phê duyệt trạng thái và phân phối dịch vụ.</p>
+                        <div class="admin-hero-badges">
+                            <span class="admin-system-badge">Database: appointment_db</span>
+                            <span class="admin-system-badge">Proxy: Nginx Active</span>
+                        </div>
+                    </div>
 
-            <p id="admin-message" role="status"></p>
+                    <div class="admin-actions-top">
+                        <a class="button button-outline" href="/" style="background: rgba(255, 255, 255, 0.08); color: white; border-color: rgba(255, 255, 255, 0.2);">
+                            Xem trang đặt lịch
+                        </a>
+                    </div>
+                </div>
+            </section>
 
-            <div class="table-wrapper">
-                <table class="appointments-table">
-                    <thead>
-                        <tr>
-                            <th>Mã</th>
-                            <th>Khách hàng</th>
-                            <th>Liên hệ</th>
-                            <th>Dịch vụ</th>
-                            <th>Ngày hẹn</th>
-                            <th>Giờ</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="appointments-body">
-                        <tr>
-                            <td colspan="8">Đang tải dữ liệu...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <!-- Admin Content -->
+            <section class="container admin-content">
+                <!-- Dynamic KPI Cards - Typographic & Neutral -->
+                <div class="admin-kpis-grid">
+                    <!-- Total -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Tổng lịch hẹn</span>
+                        </div>
+                        <div class="kpi-value" id="kpi-total-val">0</div>
+                        <span class="kpi-desc">Tổng số ghi nhận</span>
+                    </div>
+
+                    <!-- Pending -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Chờ xác nhận</span>
+                        </div>
+                        <div class="kpi-value" id="kpi-pending-val">0</div>
+                        <span class="kpi-desc">Cần xử lý duyệt</span>
+                    </div>
+
+                    <!-- Confirmed -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Đã xác nhận</span>
+                        </div>
+                        <div class="kpi-value" id="kpi-confirmed-val">0</div>
+                        <span class="kpi-desc">Lịch hẹn hợp lệ</span>
+                    </div>
+
+                    <!-- Completed -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Đã hoàn thành</span>
+                        </div>
+                        <div class="kpi-value" id="kpi-completed-val">0</div>
+                        <span class="kpi-desc">Phiên hẹn kết thúc</span>
+                    </div>
+
+                    <!-- Cancelled -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Đã hủy</span>
+                        </div>
+                        <div class="kpi-value" id="kpi-cancelled-val">0</div>
+                        <span class="kpi-desc">Lịch bị hủy</span>
+                    </div>
+                </div>
+
+                <!-- Main Management Card -->
+                <section class="admin-card">
+                    <div class="admin-card-header">
+                        <div>
+                            <span class="card-kicker">Cơ sở dữ liệu</span>
+                            <h2>Danh sách lịch hẹn</h2>
+                            <p>Tìm kiếm, cập nhật trạng thái và xuất dữ liệu.</p>
+                        </div>
+
+                        <div class="admin-card-actions">
+                            <button class="button button-outline" id="export-csv-btn" type="button" title="Tải file CSV danh sách lịch hẹn">
+                                Xuất CSV
+                            </button>
+                            <button class="button button-primary" id="refresh-button" type="button">
+                                Tải lại dữ liệu
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar Search & Filter -->
+                    <div class="admin-toolbar">
+                        <div class="toolbar-search">
+                            <input type="text" id="admin-search-input" placeholder="Tìm theo tên, số điện thoại, email hoặc mã hẹn...">
+                        </div>
+
+                        <div class="toolbar-filters">
+                            <select id="status-filter" class="filter-select" aria-label="Lọc theo trạng thái">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="pending">Chờ xác nhận</option>
+                                <option value="confirmed">Đã xác nhận</option>
+                                <option value="completed">Đã hoàn thành</option>
+                                <option value="cancelled">Đã hủy</option>
+                            </select>
+
+                            <select id="date-filter" class="filter-select" aria-label="Lọc theo thời gian">
+                                <option value="all">Tất cả ngày</option>
+                                <option value="today">Hôm nay</option>
+                                <option value="upcoming">Sắp diễn ra</option>
+                            </select>
+                        </div>
+
+                        <div id="admin-message" role="status" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Appointments Data Table -->
+                    <div class="table-wrapper">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">Mã</th>
+                                    <th style="min-width: 220px;">Khách hàng</th>
+                                    <th style="min-width: 140px;">Dịch vụ</th>
+                                    <th style="min-width: 160px;">Thời gian hẹn</th>
+                                    <th style="width: 130px;">Trạng thái</th>
+                                    <th style="width: 140px; text-align: right;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-body">
+                                <tr>
+                                    <td colspan="6" class="loading-cell">
+                                        <div style="text-align: center; padding: 24px;">
+                                            Đang tải dữ liệu từ cơ sở dữ liệu...
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+        </div>
     </main>
 
+    <!-- Modal 1: Appointment Details Dialog -->
+    <dialog id="detail-modal" class="modal" aria-labelledby="detail-modal-title">
+        <div class="modal-header">
+            <h3 id="detail-modal-title">Chi tiết lịch hẹn</h3>
+            <button type="button" class="modal-close-btn" id="close-detail-modal" aria-label="Đóng">✕</button>
+        </div>
+        <div class="modal-body" id="detail-modal-body">
+            <!-- Dynamically populated -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button button-outline" id="btn-close-detail">Đóng</button>
+        </div>
+    </dialog>
+
+    <!-- Modal 2: Confirm Action Dialog -->
+    <dialog id="confirm-modal" class="modal" aria-labelledby="confirm-modal-title">
+        <div class="modal-header">
+            <h3 id="confirm-modal-title">Xác nhận thao tác</h3>
+            <button type="button" class="modal-close-btn" id="close-confirm-modal" aria-label="Đóng">✕</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirm-modal-desc" style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;">
+                Bạn có chắc chắn muốn thực hiện hành động này?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button button-outline" id="btn-confirm-cancel">Hủy bỏ</button>
+            <button type="button" class="button button-primary" id="btn-confirm-proceed">Xác nhận</button>
+        </div>
+    </dialog>
+
+    <!-- Floating Toast Notifications -->
+    <div id="toast-container" role="region" aria-label="Thông báo hệ thống"></div>
+
+    <!-- Footer -->
     <footer class="footer">
-        <p>Appointment System - Bài thi triển khai và quản trị hệ thống</p>
+        <div class="container footer-inner">
+            <div>
+                <strong>Appointment System - Quản trị viên</strong>
+                <p>Hệ thống giám sát và quản lý đặt lịch.</p>
+            </div>
+            <p class="footer-project">Đề tài 40 · DTC245200525</p>
+        </div>
     </footer>
 
     <script src="/js/admin.js"></script>
