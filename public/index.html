@@ -245,8 +245,11 @@
 
                         <!-- Time Slots Quick Picker -->
                         <div class="field-full time-slots-container">
-                            <span class="time-slots-label">Khung giờ gợi ý:</span>
-                            <div class="time-slots-grid">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span class="time-slots-label" style="margin-bottom: 0;">Khung giờ gợi ý:</span>
+                                <small id="slot-status-hint" style="color: var(--text-muted); font-size: 0.76rem;">Chọn ngày để kiểm tra lịch trống</small>
+                            </div>
+                            <div class="time-slots-grid" id="time-slots-grid">
                                 <button type="button" class="time-slot-btn" data-time="08:30">08:30</button>
                                 <button type="button" class="time-slot-btn" data-time="09:30">09:30</button>
                                 <button type="button" class="time-slot-btn" data-time="10:30">10:30</button>
@@ -255,6 +258,21 @@
                                 <button type="button" class="time-slot-btn" data-time="14:30">14:30</button>
                                 <button type="button" class="time-slot-btn" data-time="15:30">15:30</button>
                                 <button type="button" class="time-slot-btn" data-time="16:30">16:30</button>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Appointment Summary Box -->
+                        <div id="appointment-summary" class="appointment-summary-box field-full">
+                            <div class="appointment-summary-header">
+                                <span>Tóm tắt lịch hẹn</span>
+                                <span id="summary-badge" style="font-size: 0.72rem; padding: 2px 6px; background: #e2e8f0; border-radius: 4px; color: #334155;">Dự kiến</span>
+                            </div>
+                            <div class="appointment-summary-content">
+                                <div>
+                                    <div class="appointment-summary-title" id="summary-service-name">Chưa chọn dịch vụ</div>
+                                    <div class="appointment-summary-time" id="summary-datetime">Vui lòng chọn ngày và giờ hẹn</div>
+                                </div>
+                                <div class="appointment-summary-price" id="summary-price">0 VNĐ</div>
                             </div>
                         </div>
 
@@ -272,18 +290,26 @@
         </section>
     </main>
 
-    <!-- Modal 1: Booking Success Ticket Confirmation Dialog -->
+    <!-- Modal 1: Booking Success Digital Ticket Voucher Dialog -->
     <dialog id="success-modal" class="modal" aria-labelledby="success-modal-title">
         <div class="modal-header">
             <h3 id="success-modal-title">Đặt lịch thành công</h3>
-            <button type="button" class="modal-close-btn" id="close-success-modal" aria-label="Đóng">✕</button>
+            <button type="button" class="modal-close-btn" id="close-success-modal" aria-label="Đóng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div class="modal-body">
             <div class="ticket-card">
                 <div class="ticket-header">
                     <div>
-                        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Mã phiếu hẹn</span>
-                        <div class="ticket-id" id="ticket-id">#000</div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Phiếu xác nhận đặt lịch</span>
+                        <div class="ticket-code-row">
+                            <div class="ticket-id" id="ticket-id">#0000</div>
+                            <button type="button" class="ticket-copy-btn" id="copy-ticket-code-btn" title="Sao chép mã hẹn">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <span id="copy-btn-text">Chép mã</span>
+                            </button>
+                        </div>
                     </div>
                     <span style="color: var(--status-pending-text); background: var(--status-pending-bg); border: 1px solid var(--status-pending-border); padding: 4px 10px; border-radius: var(--radius-xs); font-size: 0.8rem; font-weight: 600;">
                         Chờ xác nhận
@@ -308,14 +334,51 @@
                         <span class="val" id="ticket-datetime">-</span>
                     </div>
                 </div>
+
+                <!-- Perforated separator -->
+                <div class="ticket-perforation"></div>
+
+                <!-- Barcode representation -->
+                <div class="ticket-barcode">
+                    <svg class="barcode-svg" viewBox="0 0 160 30" preserveAspectRatio="none">
+                        <line x1="2" y1="0" x2="2" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="8" y1="0" x2="8" y2="30" stroke="#0f172a" stroke-width="3"/>
+                        <line x1="16" y1="0" x2="16" y2="30" stroke="#0f172a" stroke-width="1"/>
+                        <line x1="22" y1="0" x2="22" y2="30" stroke="#0f172a" stroke-width="4"/>
+                        <line x1="32" y1="0" x2="32" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="38" y1="0" x2="38" y2="30" stroke="#0f172a" stroke-width="1"/>
+                        <line x1="44" y1="0" x2="44" y2="30" stroke="#0f172a" stroke-width="3"/>
+                        <line x1="54" y1="0" x2="54" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="62" y1="0" x2="62" y2="30" stroke="#0f172a" stroke-width="4"/>
+                        <line x1="72" y1="0" x2="72" y2="30" stroke="#0f172a" stroke-width="1"/>
+                        <line x1="78" y1="0" x2="78" y2="30" stroke="#0f172a" stroke-width="3"/>
+                        <line x1="88" y1="0" x2="88" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="94" y1="0" x2="94" y2="30" stroke="#0f172a" stroke-width="4"/>
+                        <line x1="104" y1="0" x2="104" y2="30" stroke="#0f172a" stroke-width="1"/>
+                        <line x1="110" y1="0" x2="110" y2="30" stroke="#0f172a" stroke-width="3"/>
+                        <line x1="118" y1="0" x2="118" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="126" y1="0" x2="126" y2="30" stroke="#0f172a" stroke-width="4"/>
+                        <line x1="136" y1="0" x2="136" y2="30" stroke="#0f172a" stroke-width="1"/>
+                        <line x1="142" y1="0" x2="142" y2="30" stroke="#0f172a" stroke-width="3"/>
+                        <line x1="150" y1="0" x2="150" y2="30" stroke="#0f172a" stroke-width="2"/>
+                        <line x1="156" y1="0" x2="156" y2="30" stroke="#0f172a" stroke-width="2"/>
+                    </svg>
+                    <span class="barcode-text" id="ticket-barcode-num">APPOINTMENT-SECURE</span>
+                </div>
             </div>
 
-            <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; line-height: 1.5;">
-                Vui lòng ghi nhớ mã lịch hẹn để tra cứu tình trạng xử lý.
+            <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; line-height: 1.5; margin-bottom: 4px;">
+                Quý khách có thể theo dõi tiến độ duyệt lịch bất kỳ lúc nào bằng số điện thoại hoặc mã hẹn.
             </p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="button button-outline" onclick="window.print()">In phiếu</button>
+            <button type="button" class="button button-outline btn-icon" onclick="window.print()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                In phiếu
+            </button>
+            <button type="button" class="button button-secondary" id="btn-track-now">
+                Tra cứu tiến độ ngay
+            </button>
             <button type="button" class="button button-primary" id="btn-done-modal">Hoàn tất</button>
         </div>
     </dialog>
@@ -324,23 +387,28 @@
     <dialog id="lookup-modal" class="modal" aria-labelledby="lookup-modal-title">
         <div class="modal-header">
             <h3 id="lookup-modal-title">Tra cứu trạng thái lịch hẹn</h3>
-            <button type="button" class="modal-close-btn" id="close-lookup-modal" aria-label="Đóng">✕</button>
+            <button type="button" class="modal-close-btn" id="close-lookup-modal" aria-label="Đóng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div class="modal-body">
             <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
-                Nhập số điện thoại hoặc mã lịch hẹn để tra cứu thông tin:
+                Nhập số điện thoại đăng ký hoặc mã lịch hẹn (Ví dụ: 0366714686 hoặc #1):
             </p>
 
             <form id="lookup-form" style="display: flex; gap: 10px; margin-bottom: 18px;">
-                <input type="text" id="lookup-input" placeholder="Ví dụ: 0912345678 hoặc #3" 
-                       style="flex: 1; min-height: 42px; padding: 8px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-xs);" required>
+                <div style="position: relative; flex: 1;">
+                    <svg class="svg-icon" viewBox="0 0 24 24" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="lookup-input" placeholder="Nhập SĐT hoặc mã lịch hẹn..." 
+                           style="width: 100%; min-height: 42px; padding: 8px 12px 8px 36px; border: 1px solid var(--border-medium); border-radius: var(--radius-xs); font-size: 0.9rem;" required>
+                </div>
                 <button type="submit" class="button button-primary" style="white-space: nowrap;">
                     Tìm kiếm
                 </button>
             </form>
 
             <div id="lookup-results-container">
-                <div style="text-align: center; color: var(--text-muted); font-size: 0.88rem; padding: 20px 0;">
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.88rem; padding: 24px 0;">
                     Chưa có kết quả tra cứu. Vui lòng nhập thông tin phía trên.
                 </div>
             </div>

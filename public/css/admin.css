@@ -342,26 +342,182 @@
 
 .action-select {
     min-height: 36px;
-    padding: 6px 12px;
+    padding: 6px 30px 6px 12px;
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-xs);
-    background: #ffffff;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
     color: var(--text-primary);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     transition: all var(--transition-fast);
+    box-shadow: var(--shadow-xs);
 }
 
 .action-select:hover {
-    border-color: #64748b;
-    background: #f8fafc;
+    border-color: #475569;
+    background-color: #f8fafc;
 }
 
 .action-select:focus {
     border-color: #1e293b;
-    box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1);
+    box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.12);
+}
+
+/* Customer Cell with Initials Avatar */
+.cell-customer-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.customer-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+}
+
+/* Micro-progress indicator in KPI card */
+.kpi-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.kpi-bar-fill {
+    height: 100%;
+    background: #1e293b;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Search input with embedded icon */
+.toolbar-search {
+    position: relative;
+    flex: 1;
+    min-width: 260px;
+}
+
+.toolbar-search .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+}
+
+.toolbar-search input {
+    padding-left: 36px !important;
+    padding-right: 32px !important;
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    display: none;
+}
+
+.search-clear-btn:hover {
+    color: #0f172a;
+}
+
+/* Filter Reset Button */
+.btn-reset-filters {
+    font-size: 0.82rem;
+    color: #475569;
+    background: transparent;
+    border: 1px dashed var(--border-medium);
+    border-radius: var(--radius-xs);
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    transition: all var(--transition-fast);
+}
+
+.btn-reset-filters:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-style: solid;
+}
+
+/* Rotating animation for refresh button */
+.rotating {
+    animation: spin 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Dossier Grid in Detail Modal */
+.dossier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.dossier-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.dossier-label {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+}
+
+.dossier-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modal-direct-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-light);
 }
 
 /* Empty State */

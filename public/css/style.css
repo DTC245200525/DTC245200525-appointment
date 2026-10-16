@@ -561,6 +561,17 @@ button, input, select, textarea {
     width: 100%;
 }
 
+.service-card.active {
+    border-color: var(--brand-navy);
+    box-shadow: 0 0 0 2px var(--brand-navy), var(--shadow-md);
+}
+
+.service-card.active .service-select-btn {
+    background: var(--brand-navy);
+    color: #ffffff;
+    border-color: var(--brand-navy);
+}
+
 /* ==========================================================================
    Booking Section
    ========================================================================== */
@@ -755,6 +766,72 @@ button, input, select, textarea {
     color: #ffffff;
 }
 
+.time-slot-btn:disabled,
+.time-slot-btn.booked {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.65;
+}
+
+/* Dynamic Appointment Summary Card */
+.appointment-summary-box {
+    background: #f8fafc;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-xs);
+    padding: 14px 16px;
+    margin-top: 8px;
+    display: none;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.appointment-summary-box.show {
+    display: block;
+}
+
+.appointment-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.appointment-summary-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.92rem;
+}
+
+.appointment-summary-title {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.appointment-summary-price {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.appointment-summary-time {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .form-actions {
     display: flex;
     flex-direction: column;
@@ -868,13 +945,15 @@ dialog.modal::backdrop {
     gap: 10px;
 }
 
-/* Confirmation Ticket Styling */
+/* Confirmation Ticket Styling (Digital Voucher Style) */
 .ticket-card {
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-sm);
-    background: var(--bg-muted);
-    padding: 20px;
+    background: #ffffff;
+    padding: 24px;
     margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
 }
 
 .ticket-header {
@@ -882,21 +961,48 @@ dialog.modal::backdrop {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
-    padding-bottom: 12px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--border-light);
 }
 
 .ticket-id {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.ticket-code-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ticket-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-xs);
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.ticket-copy-btn:hover {
+    background: #e2e8f0;
     color: var(--text-primary);
 }
 
 .ticket-details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    font-size: 0.88rem;
+    gap: 14px;
+    font-size: 0.9rem;
 }
 
 .ticket-row {
@@ -905,15 +1011,136 @@ dialog.modal::backdrop {
 }
 
 .ticket-row span.label {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
 }
 
 .ticket-row span.val {
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.ticket-perforation {
+    border-top: 2px dashed var(--border-medium);
+    margin: 18px -24px;
+}
+
+.ticket-barcode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-top: 4px;
+}
+
+.barcode-svg {
+    width: 220px;
+    height: 38px;
+    opacity: 0.8;
+}
+
+.barcode-text {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+/* Lookup Stepper Progress Tracker */
+.lookup-stepper {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 20px 0 16px;
+}
+
+.lookup-stepper::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    background: var(--border-medium);
+    z-index: 1;
+}
+
+.lookup-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 2px solid var(--border-medium);
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.lookup-step.completed .step-circle {
+    border-color: #166534;
+    background: #166534;
+    color: #ffffff;
+}
+
+.lookup-step.active .step-circle {
+    border-color: var(--brand-navy);
+    background: var(--brand-navy);
+    color: #ffffff;
+}
+
+.lookup-step.cancelled .step-circle {
+    border-color: #991b1b;
+    background: #991b1b;
+    color: #ffffff;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.lookup-step.active .step-label {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* SVG Line Icon Utility (No color, monochrome, professional) */
+.svg-icon {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: -0.18em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* ==========================================================================

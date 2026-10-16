@@ -107,6 +107,7 @@
                         </div>
                         <div class="kpi-value" id="kpi-total-val">0</div>
                         <span class="kpi-desc">Tổng số ghi nhận</span>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 100%;"></div></div>
                     </div>
 
                     <!-- Pending -->
@@ -116,6 +117,7 @@
                         </div>
                         <div class="kpi-value" id="kpi-pending-val">0</div>
                         <span class="kpi-desc">Cần xử lý duyệt</span>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-pending-bar" style="width: 0%; background: #475569;"></div></div>
                     </div>
 
                     <!-- Confirmed -->
@@ -125,6 +127,7 @@
                         </div>
                         <div class="kpi-value" id="kpi-confirmed-val">0</div>
                         <span class="kpi-desc">Lịch hẹn hợp lệ</span>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-confirmed-bar" style="width: 0%; background: #166534;"></div></div>
                     </div>
 
                     <!-- Completed -->
@@ -134,6 +137,7 @@
                         </div>
                         <div class="kpi-value" id="kpi-completed-val">0</div>
                         <span class="kpi-desc">Phiên hẹn kết thúc</span>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-completed-bar" style="width: 0%; background: #0369a1;"></div></div>
                     </div>
 
                     <!-- Cancelled -->
@@ -143,6 +147,7 @@
                         </div>
                         <div class="kpi-value" id="kpi-cancelled-val">0</div>
                         <span class="kpi-desc">Lịch bị hủy</span>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-cancelled-bar" style="width: 0%; background: #991b1b;"></div></div>
                     </div>
                 </div>
 
@@ -152,15 +157,17 @@
                         <div>
                             <span class="card-kicker">Cơ sở dữ liệu</span>
                             <h2>Danh sách lịch hẹn</h2>
-                            <p>Tìm kiếm, cập nhật trạng thái và xuất dữ liệu.</p>
+                            <p>Tìm kiếm tức thì, cập nhật trạng thái trực tiếp và xuất dữ liệu.</p>
                         </div>
 
                         <div class="admin-card-actions">
-                            <button class="button button-outline" id="export-csv-btn" type="button" title="Tải file CSV danh sách lịch hẹn">
-                                Xuất CSV
+                            <button class="button button-outline btn-icon" id="export-csv-btn" type="button" title="Tải file CSV danh sách lịch hẹn (Tương thích Excel UTF-8)">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Xuất CSV</span>
                             </button>
-                            <button class="button button-primary" id="refresh-button" type="button">
-                                Tải lại dữ liệu
+                            <button class="button button-primary btn-icon" id="refresh-button" type="button">
+                                <svg class="svg-icon" id="refresh-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                <span>Tải lại</span>
                             </button>
                         </div>
                     </div>
@@ -168,7 +175,9 @@
                     <!-- Toolbar Search & Filter -->
                     <div class="admin-toolbar">
                         <div class="toolbar-search">
-                            <input type="text" id="admin-search-input" placeholder="Tìm theo tên, số điện thoại, email hoặc mã hẹn...">
+                            <svg class="svg-icon search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="admin-search-input" placeholder="Tìm kiếm nhanh tên, SĐT, email, dịch vụ hoặc mã hẹn...">
+                            <button type="button" class="search-clear-btn" id="search-clear-btn" title="Xóa tìm kiếm">✕</button>
                         </div>
 
                         <div class="toolbar-filters">
@@ -185,6 +194,11 @@
                                 <option value="today">Hôm nay</option>
                                 <option value="upcoming">Sắp diễn ra</option>
                             </select>
+
+                            <button type="button" class="btn-reset-filters" id="btn-reset-filters" title="Xóa bộ lọc đang chọn">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                Xóa bộ lọc
+                            </button>
                         </div>
 
                         <div id="admin-message" role="status" aria-live="polite"></div>
@@ -195,19 +209,20 @@
                         <table class="appointments-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 70px;">Mã</th>
-                                    <th style="min-width: 220px;">Khách hàng</th>
+                                    <th style="width: 80px;">Mã</th>
+                                    <th style="min-width: 240px;">Khách hàng</th>
                                     <th style="min-width: 140px;">Dịch vụ</th>
-                                    <th style="min-width: 160px;">Thời gian hẹn</th>
-                                    <th style="width: 130px;">Trạng thái</th>
+                                    <th style="min-width: 170px;">Thời gian hẹn</th>
+                                    <th style="width: 140px;">Trạng thái</th>
                                     <th style="width: 140px; text-align: right;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="appointments-body">
                                 <tr>
                                     <td colspan="6" class="loading-cell">
-                                        <div style="text-align: center; padding: 24px;">
-                                            Đang tải dữ liệu từ cơ sở dữ liệu...
+                                        <div style="text-align: center; padding: 28px;">
+                                            <svg class="svg-icon rotating" viewBox="0 0 24 24" style="width: 22px; height: 22px; margin-bottom: 6px;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                            <div>Đang tải dữ liệu từ cơ sở dữ liệu...</div>
                                         </div>
                                     </td>
                                 </tr>
@@ -219,16 +234,18 @@
         </div>
     </main>
 
-    <!-- Modal 1: Appointment Details Dialog -->
-    <dialog id="detail-modal" class="modal" aria-labelledby="detail-modal-title">
+    <!-- Modal 1: Appointment Details Dossier Dialog -->
+    <dialog id="detail-modal" class="modal" aria-labelledby="detail-modal-title" style="max-width: 580px; width: min(94vw, 580px);">
         <div class="modal-header">
-            <h3 id="detail-modal-title">Chi tiết lịch hẹn</h3>
-            <button type="button" class="modal-close-btn" id="close-detail-modal" aria-label="Đóng">✕</button>
+            <h3 id="detail-modal-title">Hồ sơ chi tiết lịch hẹn</h3>
+            <button type="button" class="modal-close-btn" id="close-detail-modal" aria-label="Đóng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div class="modal-body" id="detail-modal-body">
-            <!-- Dynamically populated -->
+            <!-- Dynamically populated customer dossier -->
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer" id="detail-modal-footer">
             <button type="button" class="button button-outline" id="btn-close-detail">Đóng</button>
         </div>
     </dialog>
@@ -237,7 +254,9 @@
     <dialog id="confirm-modal" class="modal" aria-labelledby="confirm-modal-title">
         <div class="modal-header">
             <h3 id="confirm-modal-title">Xác nhận thao tác</h3>
-            <button type="button" class="modal-close-btn" id="close-confirm-modal" aria-label="Đóng">✕</button>
+            <button type="button" class="modal-close-btn" id="close-confirm-modal" aria-label="Đóng">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div class="modal-body">
             <p id="confirm-modal-desc" style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;">

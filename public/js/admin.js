@@ -249,7 +249,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // -------------------------------------------------------------------------
-    // Update KPI Dashboard
+    // Helper: Customer Name Initials
+    // -------------------------------------------------------------------------
+    function getInitials(name) {
+        if (!name) return "KH";
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    // -------------------------------------------------------------------------
+    // Update KPI Dashboard with Progress Bars
     // -------------------------------------------------------------------------
     function updateKPIs(data) {
         let total = data.length;
@@ -270,17 +280,41 @@ document.addEventListener("DOMContentLoaded", () => {
         if (kpiConfirmed) kpiConfirmed.textContent = confirmed;
         if (kpiCompleted) kpiCompleted.textContent = completed;
         if (kpiCancelled) kpiCancelled.textContent = cancelled;
+
+        const pendingPct = total > 0 ? (pending / total * 100).toFixed(0) : 0;
+        const confirmedPct = total > 0 ? (confirmed / total * 100).toFixed(0) : 0;
+        const completedPct = total > 0 ? (completed / total * 100).toFixed(0) : 0;
+        const cancelledPct = total > 0 ? (cancelled / total * 100).toFixed(0) : 0;
+
+        document.getElementById("kpi-pending-bar")?.setAttribute("style", `width: ${pendingPct}%; background: #475569;`);
+        document.getElementById("kpi-confirmed-bar")?.setAttribute("style", `width: ${confirmedPct}%; background: #166534;`);
+        document.getElementById("kpi-completed-bar")?.setAttribute("style", `width: ${completedPct}%; background: #0369a1;`);
+        document.getElementById("kpi-cancelled-bar")?.setAttribute("style", `width: ${cancelledPct}%; background: #991b1b;`);
     }
 
     // -------------------------------------------------------------------------
-    // Render Appointments Table (Unified Action Select)
+    // Render Appointments Table (Unified Action Select + Avatars)
     // -------------------------------------------------------------------------
+    const searchClearBtn = document.getElementById("search-clear-btn");
+    const btnResetFilters = document.getElementById("btn-reset-filters");
+
     function renderAppointments() {
         appointmentsBody.replaceChildren();
 
         const sFilter = statusFilter?.value || "all";
         const dFilter = dateFilter?.value || "all";
         const query = (searchInput?.value || "").trim().toLowerCase();
+
+        // Show/hide clear search button
+        if (searchClearBtn) {
+            searchClearBtn.style.display = query ? "block" : "none";
+        }
+
+        // Show/hide reset filters button
+        if (btnResetFilters) {
+            const hasActiveFilters = sFilter !== "all" || dFilter !== "all" || query !== "";
+            btnResetFilters.style.display = hasActiveFilters ? "inline-flex" : "none";
+        }
 
         const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -317,7 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.innerHTML = `
                 <td colspan="6">
                     <div class="empty-state">
-                        <strong>Không có lịch hẹn phù hợp</strong>
+                        <svg class="svg-icon" viewBox="0 0 24 24" style="width: 32px; height: 32px; color: #94a3b8; stroke-width: 1.5;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <strong>Không tìm thấy lịch hẹn phù hợp</strong>
                         <p style="font-size: 0.86rem;">Vui lòng kiểm tra lại điều kiện lọc hoặc từ khóa tìm kiếm.</p>
                     </div>
                 </td>
@@ -336,19 +371,23 @@ document.addEventListener("DOMContentLoaded", () => {
             tdId.textContent = `#${String(apt.id).padStart(4, "0")}`;
             tr.appendChild(tdId);
 
-            // 2. Customer
+            // 2. Customer with Avatar
+            const initials = getInitials(apt.full_name);
             const tdCustomer = document.createElement("td");
             tdCustomer.innerHTML = `
-                <div class="cell-customer">
-                    <strong>${escapeHtml(apt.full_name)}</strong>
-                    <small>${escapeHtml(apt.phone)} · ${escapeHtml(apt.email)}</small>
+                <div class="cell-customer-wrapper">
+                    <div class="customer-avatar" title="${escapeHtml(apt.full_name)}">${initials}</div>
+                    <div class="cell-customer">
+                        <strong>${escapeHtml(apt.full_name)}</strong>
+                        <small>${escapeHtml(apt.phone)} · ${escapeHtml(apt.email)}</small>
+                    </div>
                 </div>
             `;
             tr.appendChild(tdCustomer);
 
             // 3. Service
             const tdService = document.createElement("td");
-            tdService.innerHTML = `<span>${escapeHtml(apt.service_name)}</span>`;
+            tdService.innerHTML = `<span style="font-weight: 500;">${escapeHtml(apt.service_name)}</span>`;
             tr.appendChild(tdService);
 
             // 4. Time
@@ -426,54 +465,111 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------------------
-    // View Details Modal
+    // View Details Modal (Customer Dossier + Direct Actions)
     // -------------------------------------------------------------------------
     function openDetailModal(apt) {
         const conf = statusConfig[apt.status] || { label: apt.status, class: "" };
         const dateStr = String(apt.appointment_date).slice(0, 10);
         const timeStr = `${String(apt.start_time).slice(0, 5)} - ${String(apt.end_time).slice(0, 5)}`;
         const createdStr = apt.created_at ? new Date(apt.created_at).toLocaleString("vi-VN") : "N/A";
+        const initials = getInitials(apt.full_name);
 
         detailModalBody.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
-                <div>
-                    <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Mã phiếu</span>
-                    <h2 style="font-size: 1.4rem; color: var(--text-primary); margin: 0;">#${String(apt.id).padStart(4, "0")}</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-light);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="customer-avatar" style="width: 44px; height: 44px; font-size: 1rem;">${initials}</div>
+                    <div>
+                        <span style="font-size: 0.74rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Phiếu lịch hẹn</span>
+                        <h2 style="font-size: 1.35rem; color: var(--text-primary); margin: 0; line-height: 1.2;">#${String(apt.id).padStart(4, "0")}</h2>
+                    </div>
                 </div>
                 <span class="badge ${conf.class}">${conf.label}</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Khách hàng</span>
-                    <div style="font-weight: 600; color: var(--text-primary);">${escapeHtml(apt.full_name)}</div>
+            <div class="dossier-grid">
+                <div class="dossier-item">
+                    <span class="dossier-label">Khách hàng</span>
+                    <div class="dossier-value">${escapeHtml(apt.full_name)}</div>
                 </div>
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Số điện thoại</span>
-                    <div style="font-weight: 500; color: var(--text-primary);">${escapeHtml(apt.phone)}</div>
+                <div class="dossier-item">
+                    <span class="dossier-label">Số điện thoại</span>
+                    <div class="dossier-value">
+                        <a href="tel:${escapeHtml(apt.phone)}" style="color: var(--brand-navy); text-decoration: none;">${escapeHtml(apt.phone)}</a>
+                    </div>
                 </div>
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Email</span>
-                    <div style="font-weight: 500; color: var(--text-primary);">${escapeHtml(apt.email)}</div>
+                <div class="dossier-item">
+                    <span class="dossier-label">Địa chỉ Email</span>
+                    <div class="dossier-value">
+                        <a href="mailto:${escapeHtml(apt.email)}" style="color: var(--brand-navy); text-decoration: none; word-break: break-all;">${escapeHtml(apt.email)}</a>
+                    </div>
                 </div>
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Dịch vụ</span>
-                    <div style="font-weight: 600; color: var(--text-primary);">${escapeHtml(apt.service_name)}</div>
+                <div class="dossier-item">
+                    <span class="dossier-label">Dịch vụ</span>
+                    <div class="dossier-value">${escapeHtml(apt.service_name)}</div>
                 </div>
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Ngày hẹn</span>
-                    <div style="font-weight: 600; color: var(--text-primary);">${dateStr}</div>
+                <div class="dossier-item">
+                    <span class="dossier-label">Ngày hẹn</span>
+                    <div class="dossier-value">${dateStr}</div>
                 </div>
-                <div>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Khung giờ</span>
-                    <div style="font-weight: 600; color: var(--text-primary);">${timeStr}</div>
+                <div class="dossier-item">
+                    <span class="dossier-label">Khung giờ</span>
+                    <div class="dossier-value">${timeStr}</div>
                 </div>
-                <div style="grid-column: 1 / -1; padding-top: 8px; border-top: 1px dashed var(--border-light);">
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Thời gian tạo phiếu</span>
+                <div class="dossier-item" style="grid-column: 1 / -1; padding-top: 10px; border-top: 1px dashed var(--border-light);">
+                    <span class="dossier-label">Thời gian tạo phiếu</span>
                     <div style="font-size: 0.85rem; color: var(--text-muted);">${createdStr}</div>
                 </div>
             </div>
+
+            <!-- Direct Action Controls Right Inside Detail Modal -->
+            <div class="modal-direct-actions">
+                <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-right: auto;">Thao tác nhanh:</span>
+                ${apt.status === "pending" ? `
+                    <button type="button" class="button button-sm button-primary" id="btn-modal-confirm">
+                        Xác nhận lịch
+                    </button>
+                    <button type="button" class="button button-sm button-outline" id="btn-modal-cancel" style="color: #991b1b; border-color: #fecaca;">
+                        Hủy lịch
+                    </button>
+                ` : ""}
+                ${apt.status === "confirmed" ? `
+                    <button type="button" class="button button-sm button-primary" id="btn-modal-complete">
+                        Hoàn thành
+                    </button>
+                    <button type="button" class="button button-sm button-outline" id="btn-modal-cancel" style="color: #991b1b; border-color: #fecaca;">
+                        Hủy lịch
+                    </button>
+                ` : ""}
+                ${apt.status === "completed" || apt.status === "cancelled" ? `
+                    <span style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">Phiên hẹn này đã đóng, không thể thay đổi.</span>
+                ` : ""}
+            </div>
         `;
+
+        // Direct Modal Action Listeners
+        document.getElementById("btn-modal-confirm")?.addEventListener("click", () => {
+            closeDetail();
+            openConfirmDialog(
+                `Xác nhận phê duyệt lịch hẹn #${apt.id} của khách hàng ${apt.full_name}?`,
+                () => updateStatus(apt.id, "confirmed")
+            );
+        });
+
+        document.getElementById("btn-modal-complete")?.addEventListener("click", () => {
+            closeDetail();
+            openConfirmDialog(
+                `Đánh dấu lịch hẹn #${apt.id} của khách hàng ${apt.full_name} là hoàn thành?`,
+                () => updateStatus(apt.id, "completed")
+            );
+        });
+
+        document.getElementById("btn-modal-cancel")?.addEventListener("click", () => {
+            closeDetail();
+            openConfirmDialog(
+                `Xác nhận hủy lịch hẹn #${apt.id} của khách hàng ${apt.full_name}?`,
+                () => updateStatus(apt.id, "cancelled")
+            );
+        });
 
         if (typeof detailModal.showModal === "function") {
             detailModal.showModal();
@@ -503,6 +599,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const refreshIcon = document.getElementById("refresh-icon");
+        if (refreshIcon) refreshIcon.classList.add("rotating");
         if (adminMessage) adminMessage.textContent = "Đang tải dữ liệu...";
 
         try {
@@ -528,6 +626,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             if (adminMessage) adminMessage.textContent = error.message;
             showToast(`Lỗi: ${error.message}`, "error");
+        } finally {
+            setTimeout(() => {
+                if (refreshIcon) refreshIcon.classList.remove("rotating");
+            }, 600);
         }
     }
 
@@ -571,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------------------
-    // Export Data to CSV
+    // Export Data to CSV (With UTF-8 BOM for Microsoft Excel)
     // -------------------------------------------------------------------------
     function exportToCSV() {
         if (appointments.length === 0) {
@@ -624,6 +726,20 @@ document.addEventListener("DOMContentLoaded", () => {
     searchInput?.addEventListener("input", renderAppointments);
     refreshButton?.addEventListener("click", loadAppointments);
     exportCsvBtn?.addEventListener("click", exportToCSV);
+
+    searchClearBtn?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        renderAppointments();
+        searchInput?.focus();
+    });
+
+    btnResetFilters?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        if (statusFilter) statusFilter.value = "all";
+        if (dateFilter) dateFilter.value = "all";
+        renderAppointments();
+        showToast("Đã thiết lập lại toàn bộ bộ lọc.", "info");
+    });
 
     // Initial Auth Check
     checkAuthSession();

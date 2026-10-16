@@ -446,6 +446,41 @@ app.get("/api/appointments/lookup", async (req, res) => {
     }
 });
 
+// ==================== CHECK BOOKED SLOTS BY DATE ====================
+
+app.get("/api/appointments/booked-slots", async (req, res) => {
+    const rawDate = String(req.query.date || "").trim();
+
+    if (!rawDate || !/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+        return res.status(400).json({
+            status: "error",
+            message: "Vui lòng cung cấp ngày hợp lệ (YYYY-MM-DD)."
+        });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT start_time, end_time
+            FROM appointments
+            WHERE appointment_date = $1
+              AND status IN ('pending', 'confirmed')
+            ORDER BY start_time ASC
+        `, [rawDate]);
+
+        res.json({
+            status: "success",
+            date: rawDate,
+            bookedSlots: result.rows
+        });
+    } catch (error) {
+        console.error("Booked slots error:", error.message);
+        res.status(500).json({
+            status: "error",
+            message: "Không thể kiểm tra khung giờ đã đặt."
+        });
+    }
+});
+
 // ==================== GET APPOINTMENTS (ADMIN ONLY) ====================
 
 app.get("/api/appointments", requireAdmin, async (req, res) => {
